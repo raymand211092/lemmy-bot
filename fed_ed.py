@@ -52,7 +52,7 @@ def work(context):
     if _chat_id == "":
         return
       
-    if AnythingsNew(msg) == True:
+    if AnythingNew(msg) == True:
         context.bot.send_message(chat_id=_chat_id, text=msg)
 
 def start(update, context):
