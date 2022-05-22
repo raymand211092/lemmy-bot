@@ -9,6 +9,12 @@ Bot che invia i nuovi post da Lemmy al gruppo di Etica Digitale
 ## Installation
 
 ### (Suggested) With Docker
+```bash
+git clone 
+cd lemmy-bot
+docker build -t etica-digitale/lemmy .
+sudo docker run -d -e token="YOUR_TOKEN_HERE!!" etica-digitale/lemmy
+```
 
 
 ### Classic

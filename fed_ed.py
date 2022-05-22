@@ -1,5 +1,6 @@
 import requests
 import xml.etree.ElementTree as ET
+from sys import argv
 from telegram.ext import CommandHandler, Updater
 
 _url = "https://feddit.it/feeds/c/eticadigitale.xml?sort=New"
@@ -8,7 +9,7 @@ _chat_id = ""
 
 
 # Returns true if the message should be send in the group, else false
-def AnythingNew(msg):
+def anythingNew(msg):
     omsg = ""
     try:
         with open('.lastone','r') as f: # Read last message sent
@@ -35,24 +36,24 @@ def parseXML():
     tree = ET.parse("eticadigitale.xml")
 
     msg = ""
-    ll = tree.findall('./channel/item[2]/')
-    for e in ll:
-            if (e.tag == "title"):
+    elem = tree.findall('./channel/item[2]/')
+    for subelem in elem:
+            if (subelem.tag == "title"):
                 msg = msg + e.text + "\n"
-            elif (e.tag=="link"):
+            elif (subelem.tag=="link"):
                 msg = msg + e.text
     
     return msg
 
 def work(context):
     global _chat_id
-    msg = parseXML()
-    flag = AnythingNew(msg)
 
     if _chat_id == "":
         return
-      
-    if AnythingNew(msg) == True:
+
+    msg = parseXML()
+
+    if anythingNew(msg) == True:
         context.bot.send_message(chat_id=_chat_id, text=msg)
 
 def start(update, context):
@@ -64,6 +65,11 @@ def start(update, context):
 
 def main():
     global _token
+
+    if ( len(argv) > 1):
+        print(argv[1])
+        _token = argv[1]
+
     if _token == "":
         print("Token is empty")
         return
