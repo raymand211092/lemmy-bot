@@ -24,7 +24,7 @@ You may use a python env
 git clone https://gitlab.com/etica-digitale/lemmy-bot.git
 cd lemmy-bot
 pip install python-telegram-bot
-python3 fed_ed.py
+python3 fed_ed.py YOUR_TOKEN_HERE
 
 ```
 

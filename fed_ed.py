@@ -2,6 +2,9 @@ import requests
 import xml.etree.ElementTree as ET
 from sys import argv
 from telegram.ext import CommandHandler, Updater
+from telegram import MessageEntity, Message
+from telegram import constants
+
 
 _url = "https://feddit.it/feeds/c/eticadigitale.xml?sort=New"
 _token = ""
@@ -35,14 +38,16 @@ def parseXML():
     
     tree = ET.parse("eticadigitale.xml")
 
-    msg = ""
+    msg = "📬 _Nuova discussione_\n"
     elem = tree.findall('./channel/item[2]/')
     for subelem in elem:
             if (subelem.tag == "title"):
-                msg = msg + e.text + "\n"
+                msg = msg + "*" + subelem.text +  "* \n"
             elif (subelem.tag=="link"):
-                msg = msg + e.text
+                tmp = subelem.text.split(".")
+                msg = msg + tmp[0] + '\\.' + tmp[1] + "\n"
     
+    msg = msg + '\n_Vieni a trovarci su [Lemmy](https://t\\.me/eticadigitalechannel/648)_'
     return msg
 
 def work(context):
@@ -54,20 +59,21 @@ def work(context):
     msg = parseXML()
 
     if anythingNew(msg) == True:
-        context.bot.send_message(chat_id=_chat_id, text=msg)
+        print(msg)
+        context.bot.send_message(chat_id=_chat_id, text=msg, parse_mode=constants.PARSEMODE_MARKDOWN_V2, disable_web_page_preview=True )
 
 def start(update, context):
     global _chat_id
 
     if _chat_id == "":
         _chat_id = str(update.message.chat_id)
-        update.message.reply_text("Ok")
+        context.bot.send_message(chat_id = _chat_id, text = "Ok 👀" ,parse_mode=constants.PARSEMODE_MARKDOWN_V2)
+
 
 def main():
     global _token
 
     if ( len(argv) > 1):
-        print(argv[1])
         _token = argv[1]
 
     if _token == "":
@@ -81,12 +87,11 @@ def main():
 
     j = updater.job_queue
 
-    j.run_repeating(work, interval=600, first=5)
+    j.run_repeating(work, interval=600, first=10)
 
     updater.start_polling()
     updater.idle()
                 
-
 
 if __name__=="__main__":
     main()
