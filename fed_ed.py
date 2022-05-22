@@ -24,7 +24,7 @@ def AnythingNew(msg):
     return False
     
 
-# Take the third child of the three
+# Take the third child of the tree
 def parseXML():
     global _url
     resp = requests.get(_url)
