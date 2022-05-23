@@ -67,7 +67,13 @@ def start(update, context):
 
     if _chat_id == "":
         _chat_id = str(update.message.chat_id)
-        context.bot.send_message(chat_id = _chat_id, text = "Ok 👀" ,parse_mode=constants.PARSEMODE_MARKDOWN_V2)
+        
+
+def pong(update, context):
+    global _chat_id
+
+    if _chat_id != "":
+        context.bot.send_message(chat_id = _chat_id, text = "Pong\n" + str(_chat_id) ,parse_mode=constants.PARSEMODE_MARKDOWN_V2)
 
 
 def main():
@@ -84,10 +90,11 @@ def main():
     dispatcher = updater.dispatcher 
 
     dispatcher.add_handler(CommandHandler('start',start))
+    dispatcher.add_handler(CommandHandler('ping', pong))
 
     j = updater.job_queue
 
-    j.run_repeating(work, interval=600, first=10)
+    j.run_repeating(work, interval=200, first=10)
 
     updater.start_polling()
     updater.idle()
