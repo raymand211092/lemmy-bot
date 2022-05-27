@@ -1,6 +1,6 @@
 # Lemmy bot
 
-Bot che invia i nuovi post da Lemmy al gruppo di Etica Digitale
+Telegram bot that sends new posts from a Lemmy community to a Telegram chat group
 
 ## Requirements
 - Python3.7+
@@ -27,4 +27,9 @@ pip install python-telegram-bot
 python3 fed_ed.py YOUR_TOKEN_HERE
 
 ```
+
+## How to use this bot
+1. Run the program
+2. Add the bot to a group
+3. Type `/start`, eventually /start@BOT_NAME if you already got some bots in that chat
 
