@@ -5,18 +5,44 @@ from telegram.ext import CommandHandler, Updater
 from telegram import MessageEntity, Message
 from telegram import constants
 
+from datetime import datetime
 
-#_url = "https://feddit.it/feeds/c/eticadigitale.xml?sort=New"
-_url="https://feddit.it/feeds/c/test.xml?sort=New"
+
+_url = "https://feddit.it/feeds/c/eticadigitale.xml?sort=New"
 _token = ""
 _chat_id = ""
 
-def clear_markdown_parse(msg): 
-    special = ['.','-','{','}','[',']']
 
-    print(msg)
+# Algorithm that finds the number of sticky posts
+# Assuming communities could add or remove sticked posts over time, this must be runned periodically
+def find_stickies():
+    offset=1
+
+    tree = ET.parse('eticadigitale.xml')
+
+    # Get and parse every dates from channel posts
+    dates_list = []
+    elems = tree.findall('./channel/item/pubDate')
+    for elem in elems:
+        to_parse = elem.text[0:len(elem)-6]
+        dates_list.append(datetime.strptime(to_parse, '%a, %d %B %Y %H:%M:%S'))
+    
+    # This only works if you sort xml by New
+    # If you find that the next post is older than the current one, then that's a sticky
+    for i in range(0,len(dates_list)-1):
+        if dates_list[i] < dates_list[i+1]:
+            return offset + i + 1
+
+    return offset
+
+# Some characters are reserverd for telegram markdown, so they must be escaped with the precedenting substring "\\"
+# https://core.telegram.org/bots/api#markdownv2-style
+def clear_markdown_parse(msg): 
+
+    reserved = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
+
     for i in range(0,len(msg)):
-        for ch in special:
+        for ch in reserved:
 
             if msg[i] == ch and msg[i-1] != '\\':
                 msg = msg[:i] + "\\" + msg[i:]
@@ -24,7 +50,7 @@ def clear_markdown_parse(msg):
     
     return msg
 
-# Returns true if the message should be send in the group, else false
+# Reads the old link from file, if it doesn't matches the new one, then it's a new post
 def anythingNew(link):
     old_link = ""
     try:
@@ -53,17 +79,18 @@ def parseXML():
     tree = ET.parse("eticadigitale.xml")
 
     msg = ""
-    elem = tree.findall('./channel/item[1]/')
+    offset = find_stickies()
+    elem = tree.findall("./channel/item[" + str(offset) + "]/")
     for subelem in elem:
             if (subelem.tag == "title"):
-                msg = msg + "*" + subelem.text +  "* \n"
+                msg = msg + "*" + clear_markdown_parse(subelem.text) +  "* \n"
                 
             elif (subelem.tag=="link"):
                 link = subelem.text
-                msg = msg + subelem.text + "\n"
+                msg = msg + clear_markdown_parse(subelem.text) + "\n"
     
 
-    msg = "📬 _Nuova discussione_\n" + clear_markdown_parse(msg) + "\n_Vieni a trovarci su [Lemmy](https://t.me/eticadigitalechannel/648)_"
+    msg = "📬 _Nuova discussione_\n" + msg + "\n_Vieni a trovarci su [Lemmy](https://t.me/eticadigitalechannel/648)_"
 
     return msg, link
 
@@ -92,6 +119,7 @@ def pong(update, context):
 
     if _chat_id != "":
         context.bot.send_message(chat_id = _chat_id, text = "Pong")
+        find_stickies()
 
 
 def main():
