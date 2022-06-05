@@ -25,7 +25,7 @@ def find_stickies():
     elems = tree.findall('./channel/item/pubDate')
     for elem in elems:
         to_parse = elem.text[0:len(elem)-6]
-        dates_list.append(datetime.strptime(to_parse, '%a, %d %B %Y %H:%M:%S'))
+        dates_list.append(datetime.strptime(to_parse, '%a, %d %b %Y %H:%M:%S'))
     
     # This only works if you sort xml by New
     # If you find that the next post is older than the current one, then that's a sticky
@@ -108,9 +108,13 @@ def work(context):
 def start(update, context):
     global _chat_id
 
-    if _chat_id == "":
-        _chat_id = str(update.message.chat_id)
-        context.bot.send_message(chat_id = _chat_id, text = "Bot inizializzato 👀" ,parse_mode=constants.PARSEMODE_MARKDOWN_V2)
+    print(update.message.chat_id)
+
+    with open(".config") as f:
+        _chat_id = f.read()
+
+    #if _chat_id != "":
+    #    context.bot.send_message(chat_id = _chat_id, text = "Bot inizializzato." ,parse_mode=constants.PARSEMODE_MARKDOWN_V2)
 
         
 
@@ -124,6 +128,7 @@ def pong(update, context):
 
 def main():
     global _token
+    global _chat_id
 
     if ( len(argv) > 1):
         _token = argv[1]
@@ -131,6 +136,9 @@ def main():
     if _token == "":
         print("Token is empty")
         return
+    
+    with open(".config") as f:
+        _chat_id = f.read()
     
     updater = Updater(_token, use_context=True)
     dispatcher = updater.dispatcher 
@@ -140,7 +148,7 @@ def main():
 
     j = updater.job_queue
 
-    j.run_repeating(work, interval=600, first=5)
+    j.run_repeating(work, interval=10, first=5)
 
     updater.start_polling()
     updater.idle()
