@@ -148,7 +148,7 @@ def main():
 
     j = updater.job_queue
 
-    j.run_repeating(work, interval=10, first=5)
+    j.run_repeating(work, interval=1600, first=5)
 
     updater.start_polling()
     updater.idle()
